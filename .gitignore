@@ -1,0 +1,5 @@
+build/
+result.txt
+*.o
+*.out
+.DS_Store
