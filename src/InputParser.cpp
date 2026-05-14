@@ -86,7 +86,7 @@ namespace Terracraft
             describedRooms.insert(roomNumber);
 
             Room& room = dungeon.GetRoom(roomNumber);
-            room.m_adjacentRooms.clear();
+            room.adjacentRooms.clear();
 
             const std::vector<std::string> adjacentRoomTokens = SplitByComma(tokens[1]);
             if (adjacentRoomTokens.empty())
@@ -104,7 +104,7 @@ namespace Terracraft
                     return { std::nullopt, line };
                 }
 
-                room.m_adjacentRooms.insert(adjacentRoomNumber);
+                room.adjacentRooms.insert(adjacentRoomNumber);
             }
 
             for (int resourceIndex = 0; resourceIndex < ResourceCount; ++resourceIndex)
@@ -116,18 +116,18 @@ namespace Terracraft
                     return { std::nullopt, line };
                 }
 
-                room.m_resources[static_cast<std::size_t>(resourceIndex)] = resourceAmount;
+                room.resources[static_cast<std::size_t>(resourceIndex)] = resourceAmount;
             }
         }
 
         for (const Room& room : dungeon.GetRooms())
         {
-            for (int adjacentRoomNumber : room.m_adjacentRooms)
+            for (int adjacentRoomNumber : room.adjacentRooms)
             {
                 const Room& adjacentRoom = dungeon.GetRoom(adjacentRoomNumber);
-                if (adjacentRoom.m_adjacentRooms.count(room.m_roomNumber) == 0)
+                if (adjacentRoom.adjacentRooms.count(room.roomNumber) == 0)
                 {
-                    return { std::nullopt, lines[static_cast<std::size_t>(room.m_roomNumber + 1)] };
+                    return { std::nullopt, lines[static_cast<std::size_t>(room.roomNumber + 1)] };
                 }
             }
         }
@@ -140,10 +140,10 @@ namespace Terracraft
         }
 
         SimulationSettings settings;
-        if (!TryParseInteger(settingsTokens[0], settings.m_initialFood) ||
-            settings.m_initialFood < s_minFoodAmount ||
-            settings.m_initialFood > s_maxFoodAmount ||
-            !TryParseResourceType(settingsTokens[1], settings.m_targetResource))
+        if (!TryParseInteger(settingsTokens[0], settings.initialFood) ||
+            settings.initialFood < s_minFoodAmount ||
+            settings.initialFood > s_maxFoodAmount ||
+            !TryParseResourceType(settingsTokens[1], settings.targetResource))
         {
             return { std::nullopt, settingsLine };
         }
@@ -159,18 +159,26 @@ namespace Terracraft
         }
 
         int parsedValue = 0;
+        bool isValid = true;
         for (char symbol : text)
         {
             if (!std::isdigit(static_cast<unsigned char>(symbol)))
             {
-                return false;
+                isValid = false;
+                break;
             }
 
             parsedValue = parsedValue * 10 + (symbol - '0');
             if (parsedValue > 100000)
             {
-                return false;
+                isValid = false;
+                break;
             }
+        }
+
+        if (!isValid)
+        {
+            return false;
         }
 
         value = parsedValue;
@@ -180,16 +188,18 @@ namespace Terracraft
     bool InputParser::TryParseResourceType(const std::string& text, ResourceType& resourceType)
     {
         const auto& names = GetResourceNames();
+        bool found = false;
         for (int resourceIndex = 0; resourceIndex < ResourceCount; ++resourceIndex)
         {
             if (text == names[static_cast<std::size_t>(resourceIndex)])
             {
                 resourceType = static_cast<ResourceType>(resourceIndex);
-                return true;
+                found = true;
+                break;
             }
         }
 
-        return false;
+        return found;
     }
 
     bool InputParser::IsResourceAmountValid(int amount)

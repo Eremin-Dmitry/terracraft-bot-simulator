@@ -9,20 +9,20 @@ namespace Terracraft
 {
     struct SimulationSettings
     {
-        int m_initialFood = 0;
-        ResourceType m_targetResource = ResourceType::Iron;
+        int initialFood = 0;
+        ResourceType targetResource = ResourceType::Iron;
     };
 
     struct ParsedInput
     {
-        Dungeon m_dungeon;
-        SimulationSettings m_settings;
+        Dungeon dungeon;
+        SimulationSettings settings;
     };
 
     struct ParseResult
     {
-        std::optional<ParsedInput> m_input;
-        std::string m_invalidLine;
+        std::optional<ParsedInput> input;
+        std::string invalidLine;
     };
 
     class InputParser

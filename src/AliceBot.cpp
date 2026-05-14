@@ -16,7 +16,7 @@ namespace Terracraft
     AliceBot::AliceBot(Dungeon dungeon, SimulationSettings settings)
         : m_dungeon(std::move(dungeon))
         , m_settings(settings)
-        , m_remainingFood(settings.m_initialFood)
+        , m_remainingFood(settings.initialFood)
     {
     }
 
@@ -24,7 +24,7 @@ namespace Terracraft
     {
         VisitRoom(s_startRoomNumber);
 
-        const int explorationFoodLimit = m_settings.m_initialFood / 2;
+        const int explorationFoodLimit = m_settings.initialFood / 2;
         int spentFoodForExploration = 0;
 
         while (spentFoodForExploration < explorationFoodLimit && HasUnvisitedRooms())
@@ -68,7 +68,7 @@ namespace Terracraft
     void AliceBot::VisitRoom(int roomNumber)
     {
         m_currentRoomNumber = roomNumber;
-        m_dungeon.GetRoom(roomNumber).m_wasVisited = true;
+        m_dungeon.GetRoom(roomNumber).wasVisited = true;
     }
 
     void AliceBot::MoveToRoom(int roomNumber, bool isFinalReturnMove)
@@ -119,14 +119,14 @@ namespace Terracraft
         Room& room = m_dungeon.GetRoom(m_currentRoomNumber);
         const int resourceIndex = ToIndex(resourceType);
 
-        if (!room.m_hasFreeCollection)
+        if (!room.hasFreeCollection)
         {
             --m_remainingFood;
         }
 
-        room.m_hasFreeCollection = false;
-        room.m_collectedResources[static_cast<std::size_t>(resourceIndex)] = true;
-        m_collectedResources[static_cast<std::size_t>(resourceIndex)] += room.m_resources[static_cast<std::size_t>(resourceIndex)];
+        room.hasFreeCollection = false;
+        room.collectedResources[static_cast<std::size_t>(resourceIndex)] = true;
+        m_collectedResources[static_cast<std::size_t>(resourceIndex)] += room.resources[static_cast<std::size_t>(resourceIndex)];
 
         std::ostringstream actionStream;
         actionStream << "collect " << GetResourceNames()[static_cast<std::size_t>(resourceIndex)];
@@ -139,18 +139,18 @@ namespace Terracraft
     {
         const Room& room = m_dungeon.GetRoom(m_currentRoomNumber);
         std::ostringstream stateStream;
-        stateStream << "state " << room.m_roomNumber;
+        stateStream << "state " << room.roomNumber;
 
         for (int resourceIndex = 0; resourceIndex < ResourceCount; ++resourceIndex)
         {
             stateStream << ' ';
-            if (room.m_collectedResources[static_cast<std::size_t>(resourceIndex)])
+            if (room.collectedResources[static_cast<std::size_t>(resourceIndex)])
             {
                 stateStream << '_';
             }
             else
             {
-                stateStream << room.m_resources[static_cast<std::size_t>(resourceIndex)];
+                stateStream << room.resources[static_cast<std::size_t>(resourceIndex)];
             }
         }
 
@@ -160,7 +160,7 @@ namespace Terracraft
     void AliceBot::WriteResult()
     {
         ResourceArray resourceValues = GetBaseResourceValues();
-        resourceValues[static_cast<std::size_t>(ToIndex(m_settings.m_targetResource))] *= 2;
+        resourceValues[static_cast<std::size_t>(ToIndex(m_settings.targetResource))] *= 2;
 
         int totalValue = 0;
         for (int resourceIndex = 0; resourceIndex < ResourceCount; ++resourceIndex)
@@ -182,23 +182,25 @@ namespace Terracraft
 
     bool AliceBot::HasUnvisitedRooms() const
     {
+        bool hasUnvisitedRoom = false;
         for (const Room& room : m_dungeon.GetRooms())
         {
-            if (!room.m_wasVisited)
+            if (!room.wasVisited)
             {
-                return true;
+                hasUnvisitedRoom = true;
+                break;
             }
         }
 
-        return false;
+        return hasUnvisitedRoom;
     }
 
     int AliceBot::FindNextExplorationRoom() const
     {
         const Room& currentRoom = m_dungeon.GetRoom(m_currentRoomNumber);
-        for (int adjacentRoomNumber : currentRoom.m_adjacentRooms)
+        for (int adjacentRoomNumber : currentRoom.adjacentRooms)
         {
-            if (!m_dungeon.GetRoom(adjacentRoomNumber).m_wasVisited)
+            if (!m_dungeon.GetRoom(adjacentRoomNumber).wasVisited)
             {
                 return adjacentRoomNumber;
             }
@@ -234,14 +236,14 @@ namespace Terracraft
                 roomQueue.pop();
 
                 const Room& room = m_dungeon.GetRoom(roomNumber);
-                for (int adjacentRoomNumber : room.m_adjacentRooms)
+                for (int adjacentRoomNumber : room.adjacentRooms)
                 {
                     if (wasSeen[static_cast<std::size_t>(adjacentRoomNumber)])
                     {
                         continue;
                     }
 
-                    if (!m_dungeon.GetRoom(adjacentRoomNumber).m_wasVisited)
+                    if (!m_dungeon.GetRoom(adjacentRoomNumber).wasVisited)
                     {
                         candidatesOnLevel.push_back(adjacentRoomNumber);
                         previousRoom[static_cast<std::size_t>(adjacentRoomNumber)] = roomNumber;
@@ -291,9 +293,9 @@ namespace Terracraft
             roomQueue.pop();
 
             const Room& room = m_dungeon.GetRoom(roomNumber);
-            for (int adjacentRoomNumber : room.m_adjacentRooms)
+            for (int adjacentRoomNumber : room.adjacentRooms)
             {
-                if (!m_dungeon.GetRoom(adjacentRoomNumber).m_wasVisited)
+                if (!m_dungeon.GetRoom(adjacentRoomNumber).wasVisited)
                 {
                     continue;
                 }
@@ -313,9 +315,9 @@ namespace Terracraft
             const Room& room = m_dungeon.GetRoom(roomNumber);
             int nextRoomNumber = -1;
 
-            for (int adjacentRoomNumber : room.m_adjacentRooms)
+            for (int adjacentRoomNumber : room.adjacentRooms)
             {
-                if (!m_dungeon.GetRoom(adjacentRoomNumber).m_wasVisited)
+                if (!m_dungeon.GetRoom(adjacentRoomNumber).wasVisited)
                 {
                     continue;
                 }
@@ -359,16 +361,16 @@ namespace Terracraft
             roomQueue.pop();
 
             const Room& room = m_dungeon.GetRoom(roomNumber);
-            for (int adjacentRoomNumber : room.m_adjacentRooms)
-            {
-                if (wasSeen[static_cast<std::size_t>(adjacentRoomNumber)])
+for (int adjacentRoomNumber : room.adjacentRooms)
                 {
-                    continue;
-                }
+                    if (wasSeen[static_cast<std::size_t>(adjacentRoomNumber)])
+                    {
+                        continue;
+                    }
 
-                const bool canEnterRoom = adjacentRoomNumber == targetRoomNumber ||
-                    !onlyVisitedIntermediateRooms ||
-                    m_dungeon.GetRoom(adjacentRoomNumber).m_wasVisited;
+                    const bool canEnterRoom = adjacentRoomNumber == targetRoomNumber ||
+                        !onlyVisitedIntermediateRooms ||
+                        m_dungeon.GetRoom(adjacentRoomNumber).wasVisited;
 
                 if (!canEnterRoom)
                 {
@@ -407,8 +409,8 @@ namespace Terracraft
         std::vector<ResourceType> availableResources;
         for (int resourceIndex = 0; resourceIndex < ResourceCount; ++resourceIndex)
         {
-            if (room.m_resources[static_cast<std::size_t>(resourceIndex)] > 0 &&
-                !room.m_collectedResources[static_cast<std::size_t>(resourceIndex)])
+            if (room.resources[static_cast<std::size_t>(resourceIndex)] > 0 &&
+                !room.collectedResources[static_cast<std::size_t>(resourceIndex)])
             {
                 availableResources.push_back(static_cast<ResourceType>(resourceIndex));
             }
@@ -432,7 +434,7 @@ namespace Terracraft
     int AliceBot::GetResourceValue(ResourceType resourceType) const
     {
         ResourceArray resourceValues = GetBaseResourceValues();
-        resourceValues[static_cast<std::size_t>(ToIndex(m_settings.m_targetResource))] *= 2;
+        resourceValues[static_cast<std::size_t>(ToIndex(m_settings.targetResource))] *= 2;
         return resourceValues[static_cast<std::size_t>(ToIndex(resourceType))];
     }
 
@@ -443,15 +445,17 @@ namespace Terracraft
 
     bool AliceBot::RoomHasAvailableResource(const Room& room) const
     {
+        bool hasAvailableResource = false;
         for (int resourceIndex = 0; resourceIndex < ResourceCount; ++resourceIndex)
         {
-            if (room.m_resources[static_cast<std::size_t>(resourceIndex)] > 0 &&
-                !room.m_collectedResources[static_cast<std::size_t>(resourceIndex)])
+            if (room.resources[static_cast<std::size_t>(resourceIndex)] > 0 &&
+                !room.collectedResources[static_cast<std::size_t>(resourceIndex)])
             {
-                return true;
+                hasAvailableResource = true;
+                break;
             }
         }
 
-        return false;
+        return hasAvailableResource;
     }
 }

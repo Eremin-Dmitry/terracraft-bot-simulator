@@ -9,7 +9,7 @@ namespace Terracraft
     {
         for (int roomNumber = 0; roomNumber <= roomCount; ++roomNumber)
         {
-            m_rooms[static_cast<std::size_t>(roomNumber)].m_roomNumber = roomNumber;
+            m_rooms[static_cast<std::size_t>(roomNumber)].roomNumber = roomNumber;
         }
     }
 

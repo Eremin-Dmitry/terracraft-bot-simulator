@@ -9,12 +9,12 @@ namespace Terracraft
 {
     struct Room
     {
-        int m_roomNumber = 0;
-        std::set<int> m_adjacentRooms;
-        ResourceArray m_resources = { 0, 0, 0, 0 };
-        ResourceCollectedArray m_collectedResources = { false, false, false, false };
-        bool m_hasFreeCollection = true;
-        bool m_wasVisited = false;
+        int roomNumber = 0;
+        std::set<int> adjacentRooms;
+        ResourceArray resources = { 0, 0, 0, 0 };
+        ResourceCollectedArray collectedResources = { false, false, false, false };
+        bool hasFreeCollection = true;
+        bool wasVisited = false;
     };
 
     class Dungeon
